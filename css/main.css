@@ -653,14 +653,23 @@ textarea,
   
   /* small screens */
   @media screen and (max-width: 991px) {
-	.one-page-layout .home-heading {
-	  align-self: flex-start; margin-top: 7vh; text-align: left; padding-left: calc(20px + 17vw);
+	.one-page-layout .home-heading  {
+	  align-self: flex-start; margin-top: 7vh; text-align: left; padding-left: calc(70px + 17vw);
 	  }
   }
+
+@media screen and (max-width: 991px) {
+    .home-job-title {
+        width: 210.078px;
+        visibility: inherit;
+        opacity: 1;
+    }
+}
   /* phone landscape */
   @media only screen and (max-device-width: 991px) and (max-device-height: 500px)  { 
-	  .home-heading {
+	  .home-heading .home-job-title{
 		  text-align: center; 
+
 		  }
   
   }
@@ -767,6 +776,7 @@ textarea,
 .one-page-layout .home-job-title {
 	opacity: 0;
 	}
+
 
 
 /* HOME MENU */
