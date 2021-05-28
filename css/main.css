@@ -658,13 +658,7 @@ textarea,
 	  }
   }
 
-@media screen and (max-width: 991px) {
-    .home-job-title {
-        width: 210.078px;
-        visibility: inherit;
-        opacity: 1;
-    }
-}
+
   /* phone landscape */
   @media only screen and (max-device-width: 991px) and (max-device-height: 500px)  { 
 	  .home-heading .home-job-title{
@@ -767,8 +761,19 @@ textarea,
   
 /* Home Job Title */
 .home-job-title {
-	margin: 0 auto; white-space: normal; box-sizing: border-box; font-size: calc(10px + .14vw); font-weight: 700; position: absolute; bottom: 106%; color: #fff; text-align: right; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 8px rgba(0, 0, 0, 0.44);
-	}
+    margin: 0 auto;
+    white-space: normal;
+    box-sizing: border-box;
+    font-size: calc(10px + .14vw);
+    font-weight: 700;
+    position: absolute;
+    bottom: 106%;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.44);
+}
+
 .no-image-logo .home-job-title { 
 	text-align: center; 
 	}
@@ -777,6 +782,10 @@ textarea,
 	opacity: 0;
 	}
 
+p.home-job-title {
+    font-size: 50px;
+    text-align: center;
+}
 
 
 /* HOME MENU */
