@@ -78,6 +78,12 @@ img,
 figure {
     max-width: 100%;
     height: auto;
+
+}
+
+img, {
+    max-width: 100%;
+    height: auto;
 }
 
 /* ----- 1.2 FONTS ----- */
@@ -682,6 +688,7 @@ textarea,
 
 .fw-300 {
     font-weight: 300;
+    font-size: 22px;
 }
 
 .fw-400 {
@@ -2156,7 +2163,7 @@ html .process img {
 
 .row > div:first-child .process,
 .elementor-column:first-child .process {
-    background: #eaebe7;
+    /*background: #eaebe7;*/
 }
 
     .row > div:first-child .process i,
@@ -2180,7 +2187,7 @@ html .process img {
 
 .row > div:last-child .process,
 .elementor-column:last-child .process {
-    background: #ebebe7;
+    /*background: #ebebe7;*/
 }
 
 /* FUN FACT */
