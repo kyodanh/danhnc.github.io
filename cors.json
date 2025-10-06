@@ -1,7 +1,12 @@
 [
   {
-    "origin": ["http://localhost:8000", "http://127.0.0.1:8000"],
-    "method": ["GET", "POST", "PUT", "DELETE"],
-    "maxAgeSeconds": 3600
+    "origin": [
+      "http://localhost:8000",
+      "http://127.0.0.1:8000",
+      "https://kyodanh.github.io"
+    ],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Content-Range", "Content-Disposition", "Content-Length"]
   }
 ]
