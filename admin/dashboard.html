@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DanhNCCV</title>
+
+    <!-- FAV and TOUCH ICONS -->
+    <link rel="shortcut icon" href="../images/ico/d1.png">
+
+    <!-- FONTS -->
+    <link rel="stylesheet" href="../css/fonts/jost/jost.css">
+    <link rel="stylesheet" href="../css/fonts/fontello/css/fontello.css">
+
+    <!-- STYLES -->
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="admin.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-dashboard-page">
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <div class="sidebar-header">
+            <img src="images/home/icon.svg" alt="Logo" class="sidebar-logo">
+            <h2>Admin Panel</h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="posts">
+                <i class="icon-doc-text"></i>
+                <span>Bài viết</span>
+            </a>
+            <a href="#" class="nav-item" data-section="new-post">
+                <i class="icon-plus"></i>
+                <span>Thêm bài mới</span>
+            </a>
+            <a href="#" class="nav-item" data-section="settings">
+                <i class="icon-cog"></i>
+                <span>Cài đặt</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <span id="userEmail">admin@example.com</span>
+            </div>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="icon-logout"></i> Đăng xuất
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="btn-menu-toggle">
+                    <i class="icon-menu"></i>
+                </button>
+                <h1 id="pageTitle">Quản lý bài viết</h1>
+            </div>
+            <div class="header-right">
+                <a href="../index.html" class="btn-view-site" target="_blank">
+                    <i class="icon-eye"></i> Xem trang web
+                </a>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="admin-content">
+
+            <!-- Posts Section -->
+            <section id="postsSection" class="content-section active">
+                <div class="section-header">
+                    <h2>Danh sách bài viết</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchPosts" placeholder="Tìm kiếm bài viết...">
+                    </div>
+                </div>
+
+                <div class="posts-grid" id="postsGrid">
+                    <!-- Posts will be loaded here -->
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Đang tải bài viết...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New Post Section -->
+            <section id="newPostSection" class="content-section">
+                <div class="section-header">
+                    <h2>Tạo bài viết mới</h2>
+                </div>
+
+                <form id="postForm" class="post-form">
+                    <input type="hidden" id="postId" name="postId">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="postTitle">Tiêu đề bài viết *</label>
+                            <input type="text" id="postTitle" name="title" required placeholder="Nhập tiêu đề bài viết">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="postCategory">Danh mục *</label>
+                            <input type="text" id="postCategory" name="category" required placeholder="VD: Technology, Design, Life">
+                        </div>
+                        <div class="form-group">
+                            <label for="postTags">Tags (phân cách bằng dấu phẩy)</label>
+                            <input type="text" id="postTags" name="tags" placeholder="VD: javascript, web, tutorial">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="postImage">Ảnh/Video đại diện</label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="postImageFile" accept="image/*,video/*,.gif" style="display: none;">
+                                <button type="button" class="btn-upload" onclick="document.getElementById('postImageFile').click()">
+                                    <i class="icon-upload"></i> Chọn file từ máy tính
+                                </button>
+                                <input type="url" id="postImage" name="image" placeholder="Hoặc nhập URL: https://example.com/image.jpg">
+                            </div>
+                            <div id="uploadProgress" style="display: none; margin-top: 10px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <p id="uploadStatus">Đang upload...</p>
+                            </div>
+                            <div id="imagePreview" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="postExcerpt">Mô tả ngắn *</label>
+                            <textarea id="postExcerpt" name="excerpt" rows="3" required placeholder="Mô tả ngắn về bài viết (150-200 ký tự)"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="postContent">Nội dung bài viết *</label>
+                            <textarea id="postContent" name="content" rows="15" required placeholder="Viết nội dung bài viết ở đây... (Hỗ trợ HTML)"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancelBtn" class="btn-secondary">Hủy</button>
+                        <button type="submit" class="btn-primary">
+                            <span class="btn-text">Xuất bản bài viết</span>
+                            <span class="btn-loader" style="display: none;">
+                                <span class="spinner"></span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Cài đặt</h2>
+                </div>
+
+                <div class="settings-content">
+                    <div class="setting-item">
+                        <h3>Thông tin tài khoản</h3>
+                        <p>Email: <strong id="settingsEmail">admin@example.com</strong></p>
+                    </div>
+
+                    <div class="setting-item">
+                        <h3>Thay đổi mật khẩu</h3>
+                        <form id="changePasswordForm">
+                            <div class="form-group">
+                                <label>Mật khẩu mới</label>
+                                <input type="password" id="newPassword" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn-primary">Cập nhật mật khẩu</button>
+                        </form>
+                    </div>
+
+                    <div class="setting-item">
+                        <h3>Thống kê</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h4 id="totalPosts">0</h4>
+                                <p>Tổng bài viết</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4 id="publishedPosts">0</h4>
+                                <p>Đã xuất bản</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Xác nhận xóa</h3>
+            <p>Bạn có chắc chắn muốn xóa bài viết này không?</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+                <button class="btn-danger" id="confirmDeleteBtn">Xóa bài viết</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

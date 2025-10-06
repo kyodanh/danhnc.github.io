@@ -212,13 +212,13 @@
 
                                 <!-- CATEGORY ARCHIVE TITLE -->
                                 <!--<header class="entry-header">
-                                    
-                                            <div class="section-title center">    
+
+                                            <div class="section-title center">
                                                 <h2><i>Category</i></h2>
                                             </div>
-                                            
+
                                             <h1 class="entry-title">adventure</h1>
-                                            
+
                                         </header>-->
 
 
@@ -229,7 +229,13 @@
                                 </header>
                                 <!-- .entry-header -->
 
+                                <!-- Blog posts container - will be filled by Firebase -->
+                                <div id="blog-posts-container">
+                                    <p style="text-align: center; padding: 40px;">Đang tải bài viết...</p>
+                                </div>
 
+                                <!-- OLD STATIC CONTENT - REMOVE AFTER FIREBASE WORKS -->
+                                <!--
                                 <!-- .hentry -->
                                 <article class="hentry post has-post-thumbnail">
 
@@ -892,8 +898,8 @@
 
                                 </nav>
                                 <!-- .navigation .pagination -->
-
-
+                                -->
+                                <!-- END OLD STATIC CONTENT -->
 
                             </div>
                             <!-- blog-regular -->
@@ -1312,7 +1318,14 @@
         <script src="js/resize-sensor.js"></script>
         <script src="js/jquery-sticky-sidebar.js"></script>
         <script src="js/main.js"></script>
-        
-        
+
+        <!-- Firebase -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+        <script src="js/firebase-config.js"></script>
+        <script src="js/blog-loader.js"></script>
+
 	</body>
 <!-- InstanceEnd --></html>

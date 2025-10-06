@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .btn-upload {
+            padding: 10px 20px;
+            background: #1851f1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-upload:hover {
+            background: #0d3cc7;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1851f1 0%, #10b981 100%);
+            transition: width 0.3s;
+            width: 0%;
+        }
+        #imagePreview {
+            margin-top: 20px;
+            max-width: 400px;
+        }
+        #imagePreview img,
+        #imagePreview video {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .preview-remove {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Upload File to Firebase Storage</h1>
+
+    <div class="form-group">
+        <label>Upload ảnh/video từ máy tính:</label>
+        <input type="file" id="fileInput" accept="image/*,video/*,.gif" style="display: none;">
+        <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+            📁 Chọn file từ máy tính
+        </button>
+
+        <input type="url" id="urlInput" placeholder="Hoặc nhập URL: https://example.com/image.jpg">
+
+        <div id="uploadProgress" style="display: none; margin-top: 10px;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="uploadStatus">Đang upload...</p>
+        </div>
+
+        <div id="imagePreview"></div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        let uploadedFileURL = null;
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+            if (!validTypes.includes(file.type)) {
+                alert('Chỉ hỗ trợ file ảnh (JPEG, PNG, GIF, WEBP) và video (MP4, WEBM)!');
+                return;
+            }
+
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('File quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
+                return;
+            }
+
+            await uploadFile(file);
+        });
+
+        async function uploadFile(file) {
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const imagePreview = document.getElementById('imagePreview');
+
+            uploadProgress.style.display = 'block';
+            uploadStatus.textContent = 'Đang upload...';
+            uploadStatus.style.color = '#64748b';
+            progressFill.style.width = '0%';
+
+            try {
+                // Wait for Firebase Storage to be ready
+                await new Promise(resolve => {
+                    const check = setInterval(() => {
+                        if (window.firebaseStorage) {
+                            clearInterval(check);
+                            resolve();
+                        }
+                    }, 100);
+                });
+
+                const timestamp = Date.now();
+                const filename = `blog/${timestamp}_${file.name}`;
+                const storageRef = window.firebaseStorage.ref(filename);
+                const uploadTask = storageRef.put(file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressFill.style.width = progress + '%';
+                        uploadStatus.textContent = `Đang upload... ${Math.round(progress)}%`;
+                    },
+                    (error) => {
+                        console.error('Upload error:', error);
+                        uploadStatus.textContent = 'Lỗi upload: ' + error.message;
+                        uploadStatus.style.color = '#ef4444';
+                    },
+                    async () => {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        uploadedFileURL = downloadURL;
+
+                        document.getElementById('urlInput').value = downloadURL;
+
+                        const isVideo = file.type.startsWith('video/');
+                        imagePreview.innerHTML = `
+                            ${isVideo ?
+                                `<video src="${downloadURL}" controls style="width: 100%;"></video>` :
+                                `<img src="${downloadURL}" alt="Preview" />`
+                            }
+                            <button class="preview-remove" onclick="removeFile()">🗑️ Xóa file</button>
+                        `;
+
+                        uploadStatus.textContent = '✅ Upload thành công!';
+                        uploadStatus.style.color = '#10b981';
+
+                        setTimeout(() => {
+                            uploadProgress.style.display = 'none';
+                        }, 2000);
+                    }
+                );
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                uploadStatus.textContent = 'Lỗi: ' + error.message;
+                uploadStatus.style.color = '#ef4444';
+            }
+        }
+
+        async function removeFile() {
+            if (!uploadedFileURL) return;
+            if (!confirm('Bạn có chắc muốn xóa file?')) return;
+
+            try {
+                const storageRef = window.firebaseStorage.refFromURL(uploadedFileURL);
+                await storageRef.delete();
+
+                document.getElementById('imagePreview').innerHTML = '';
+                document.getElementById('urlInput').value = '';
+                document.getElementById('fileInput').value = '';
+                uploadedFileURL = null;
+
+                alert('Đã xóa file thành công!');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('imagePreview').innerHTML = '';
+                document.getElementById('urlInput').value = '';
+                uploadedFileURL = null;
+            }
+        }
+
+        // Check Firebase init
+        setTimeout(() => {
+            if (!window.firebaseStorage) {
+                alert('⚠️ Firebase Storage chưa được khởi tạo!\n\nVui lòng kiểm tra:\n1. Firebase Storage đã được bật chưa?\n2. Storage Rules đã được cấu hình chưa?');
+            } else {
+                console.log('✅ Firebase Storage ready!');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

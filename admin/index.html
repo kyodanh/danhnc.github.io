@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - DanhNCCV</title>
+
+    <!-- FAV and TOUCH ICONS -->
+    <link rel="shortcut icon" href="../images/ico/d1.png">
+
+    <!-- FONTS -->
+    <link rel="stylesheet" href="../css/fonts/jost/jost.css">
+
+    <!-- STYLES -->
+    <link rel="stylesheet" type="text/css" href="../css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="admin.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+</head>
+<body class="admin-login-page">
+
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <img src="../images/home/icon.svg" alt="Logo" class="login-logo">
+                <h1>Admin Login</h1>
+                <p>Đăng nhập để quản lý blog</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="admin@example.com" autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                <button type="submit" class="btn-login">
+                    <span class="btn-text">Đăng nhập</span>
+                    <span class="btn-loader" style="display: none;">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a href="../index.html" class="back-home">← Quay lại trang chủ</a>
+            </div>
+        </div>
+
+        <!-- Background Animation -->
+        <div class="login-bg">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        // Authentication Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Wait for Firebase
+            setTimeout(() => {
+                if (!window.firebaseAuth) {
+                    errorMessage.textContent = 'Lỗi tải Firebase. Vui lòng refresh trang.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                // Check if already logged in
+                firebaseAuth.onAuthStateChanged(user => {
+                    if (user) {
+                        window.location.href = 'dashboard.html';
+                    }
+                });
+
+                // Login form submission
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    const btnText = document.querySelector('.btn-text');
+                    const btnLoader = document.querySelector('.btn-loader');
+                    const submitBtn = document.querySelector('.btn-login');
+
+                    // Show loading
+                    btnText.style.display = 'none';
+                    btnLoader.style.display = 'block';
+                    submitBtn.disabled = true;
+                    errorMessage.style.display = 'none';
+
+                    try {
+                        await firebaseAuth.signInWithEmailAndPassword(email, password);
+                        window.location.href = 'dashboard.html';
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        const errorMessages = {
+                            'auth/invalid-email': 'Email không hợp lệ',
+                            'auth/user-disabled': 'Tài khoản đã bị vô hiệu hóa',
+                            'auth/user-not-found': 'Email hoặc mật khẩu không đúng',
+                            'auth/wrong-password': 'Email hoặc mật khẩu không đúng',
+                            'auth/too-many-requests': 'Quá nhiều lần thử. Vui lòng thử lại sau',
+                            'auth/network-request-failed': 'Lỗi kết nối mạng'
+                        };
+                        errorMessage.textContent = errorMessages[error.code] || 'Đã có lỗi xảy ra. Vui lòng thử lại';
+                        errorMessage.style.display = 'block';
+
+                        // Hide loading
+                        btnText.style.display = 'block';
+                        btnLoader.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>
